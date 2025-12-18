@@ -62,11 +62,18 @@ const uploadDocument = async (req, res) => {
       }
     }
 
+    // Ensure PDFs use a viewable URL (without download flags)
+    let fileUrl = uploadResult.secure_url;
+    if (file.mimetype === 'application/pdf') {
+      // Remove any attachment flags and add inline display flag
+      fileUrl = uploadResult.secure_url.replace('/upload/', '/upload/fl_attachment:false/');
+    }
+
     const documentData = {
       memberId,
       docType,
       fileName: file.originalname,
-      fileUrl: uploadResult.secure_url,
+      fileUrl: fileUrl,
       fileSize: file.size,
       mimeType: file.mimetype,
       status: 'PENDING',

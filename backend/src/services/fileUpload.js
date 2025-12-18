@@ -9,6 +9,7 @@ const uploadToCloudinary = (buffer, options = {}) => {
         folder: 'iwc-documents',
         use_filename: true,
         unique_filename: true,
+        access_mode: 'public',
         ...options,
       },
       (error, result) => {

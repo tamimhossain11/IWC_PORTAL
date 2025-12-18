@@ -49,7 +49,7 @@ export default function ReportsPage() {
 
     const csvContent = [
       Object.keys(csvData[0]).join(','),
-      ...csvData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
+      ...csvData.map((row: any) => Object.values(row).map(val => `"${val}"`).join(','))
     ].join('\n')
 
     const blob = new Blob([csvContent], { type: 'text/csv' })
@@ -79,7 +79,7 @@ export default function ReportsPage() {
 
     const csvContent = [
       Object.keys(csvData[0]).join(','),
-      ...csvData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
+      ...csvData.map((row: any) => Object.values(row).map(val => `"${val}"`).join(','))
     ].join('\n')
 
     const blob = new Blob([csvContent], { type: 'text/csv' })
