@@ -73,6 +73,15 @@ export default function DocumentsPage() {
   }
 
   const handleViewDocument = (doc: any) => {
+    // Ensure mimeType is set, infer from filename if not available
+    if (!doc.mimeType && doc.fileName) {
+      const ext = doc.fileName.toLowerCase().split('.').pop()
+      if (ext === 'pdf') {
+        doc.mimeType = 'application/pdf'
+      } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+        doc.mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`
+      }
+    }
     setViewingDoc(doc)
     setShowDocumentViewer(true)
   }
@@ -88,8 +97,15 @@ export default function DocumentsPage() {
     document.body.removeChild(link)
   }
 
-  const isPDF = (mimeType: string) => mimeType === 'application/pdf'
-  const isImage = (mimeType: string) => mimeType.startsWith('image/')
+  const isPDF = (mimeType: string | undefined) => {
+    if (!mimeType) return false
+    return mimeType === 'application/pdf' || mimeType.includes('pdf')
+  }
+  
+  const isImage = (mimeType: string | undefined) => {
+    if (!mimeType) return false
+    return mimeType.startsWith('image/') || mimeType.includes('image')
+  }
 
   const documents = documentsData?.data?.data?.documents || []
   const pagination = documentsData?.data?.data?.pagination
@@ -458,21 +474,39 @@ export default function DocumentsPage() {
                 <div className="text-center py-8">
                   <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 mb-4">
-                    Cannot preview this file type: {viewingDoc.mimeType}
+                    {viewingDoc.mimeType ? 
+                      `Cannot preview this file type: ${viewingDoc.mimeType}` : 
+                      'Preview not available - file type unknown'}
                   </p>
-                  <Button
-                    onClick={() => handleDownloadDocument(viewingDoc)}
-                    className="mr-2"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download File
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => window.open(viewingDoc.fileUrl, '_blank')}
-                  >
-                    Open in New Tab
-                  </Button>
+                  <p className="text-sm text-gray-500 mb-4">
+                    You can download the file or open it in a new tab to view it.
+                  </p>
+                  <div className="flex justify-center gap-3">
+                    <Button
+                      onClick={() => handleDownloadDocument(viewingDoc)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download File
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => window.open(viewingDoc.fileUrl, '_blank')}
+                    >
+                      Open in New Tab
+                    </Button>
+                  </div>
+                  {/* Also try to display as iframe as fallback */}
+                  {viewingDoc.fileUrl && (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-2">Quick Preview Attempt:</p>
+                      <iframe
+                        src={viewingDoc.fileUrl}
+                        className="w-full h-96 border rounded"
+                        title={viewingDoc.fileName}
+                        onError={() => console.log('Iframe failed to load')}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
